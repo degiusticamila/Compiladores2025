@@ -14,15 +14,14 @@ public class AnalizadorLexico {
         inicializarPalabrasClave();
     }
     public Token proximoToken() throws ExcepcionLexica, IOException {
-        return einicial();
+        return estadoInicial();
     }
-    public Token einicial() throws ExcepcionLexica, IOException {
-        //Arranca todo dependiendo de que llegue
+    public Token estadoInicial() throws ExcepcionLexica, IOException {
 
         // Ignorar espacios y tabulaciones
         if (Character.isSpaceChar(caracterActual) || Character.isWhitespace(caracterActual)) {
             actualizarCaracterActual();
-            return einicial();
+            return estadoInicial();
         }
 
         // Letras
@@ -30,21 +29,21 @@ public class AnalizadorLexico {
             actualizarLexema();
             actualizarCaracterActual();
             if (Character.isUpperCase(caracterActual)) {
-                return e1Mayuscula();
-            } else { // necesariamente es minúscula
-                return e1Minuscula();
+                return scanIdentificadorClase();
+            } else {
+                return scanIdentificadorVarOMetodo();
             }
         }
         if (Character.isDigit(caracterActual)) {
             actualizarLexema();
             actualizarCaracterActual();
-            return e2();
+            return scanLiteralEntero();
         }
         // Caracteres
         if (caracterActual == '\''){
             actualizarLexema();
             actualizarCaracterActual();
-            return e3();
+            return scanCharInicio();
         }
         if (caracterActual == '"'){
             actualizarLexema();
@@ -86,7 +85,7 @@ public class AnalizadorLexico {
         if (caracterActual == '*') {
             actualizarLexema();
             actualizarCaracterActual();
-            return e21();
+            return scanOperadorMult();
         }
 
         if (caracterActual == '|') {
@@ -94,10 +93,15 @@ public class AnalizadorLexico {
             actualizarCaracterActual();
             return e22();
         }
+        if(caracterActual == '&'){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return e37();
+        }
         if (caracterActual == '%') {
             actualizarLexema();
             actualizarCaracterActual();
-            return e24();
+            return scanOperadorMod();
         }
         if (caracterActual == '{') {
             actualizarLexema();
@@ -141,7 +145,6 @@ public class AnalizadorLexico {
         }
         if (caracterActual == '/'){
             //primero q nada tiene que ser finalizador pq es una division ?
-            //arrancamos con los comantarios! jejeje
             actualizarLexema();
             actualizarCaracterActual();
             return e11();
@@ -151,19 +154,19 @@ public class AnalizadorLexico {
         }
         // Cualquier otro carácter no válido
         actualizarLexema();
-        throw new ExcepcionLexica(lexema, sourceManager.getLineNumber());
+        throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
     }
-    public Token e1Mayuscula() throws ExcepcionLexica, IOException {
+    public Token scanIdentificadorClase() throws IOException {
         if(Character.isLetter(caracterActual) || Character.isDigit(caracterActual) || caracterActual == '_'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e1Mayuscula();
+            return scanIdentificadorClase();
         }
         else{
             return new Token("idClase", lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e1Minuscula() throws ExcepcionLexica, IOException {
+    public Token scanIdentificadorVarOMetodo() throws ExcepcionLexica, IOException {
         //primero que nada me fijo si lexema pertenece a palabrasReservadas, si matchea devuelvo
         //un token con ese ID, sino hago todo esto
         if(Arrays.asList(palabrasClave).contains(lexema)){
@@ -171,61 +174,64 @@ public class AnalizadorLexico {
         } else if(Character.isLetter(caracterActual) || Character.isDigit(caracterActual) || caracterActual == '_'){
                 actualizarLexema();
                 actualizarCaracterActual();
-                return e1Minuscula();
+                return scanIdentificadorVarOMetodo();
         } else{
             return new Token("idMetVar", lexema,sourceManager.getLineNumber());
         }
 
     }
-    public Token e2() throws ExcepcionLexica, IOException {
+    public Token scanLiteralEntero() throws ExcepcionLexica, IOException {
         if(lexema.length() > 9){
-            throw new ExcepcionLexica("Error: "+lexema+"Num mayor que 9 digitos", sourceManager.getLineNumber());
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
         if(Character.isDigit(caracterActual)){
             actualizarLexema();
             actualizarCaracterActual();
-            return e2();
+            return scanLiteralEntero();
         }
         else{
             return new Token("intLiteral",lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e3() throws ExcepcionLexica, IOException {
+    public Token scanCharInicio() throws ExcepcionLexica, IOException {
         if(caracterActual == '\\'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e5();
+            return scanCharEscape();
         }
-        else if(caracterActual != '\'' && caracterActual != '\\' && caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
+        else if(caracterActual != '\'' && caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
-            return e4();
+            return scanCharCierre();
         }
         else{
-            throw new ExcepcionLexica("Error: literal de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e4() throws IOException, ExcepcionLexica {
+    public Token scanCharCierre() throws IOException, ExcepcionLexica {
         if(caracterActual == '\''){
             actualizarLexema();
             actualizarCaracterActual();
-            return e6();
+            return finalizarCharLiteral();
         }
         else{
-            throw new ExcepcionLexica("Error: literal de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e5() throws IOException, ExcepcionLexica {
-        if(caracterActual!= '\'' && caracterActual != '\\' && caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
+    public Token scanCharEscape() throws IOException, ExcepcionLexica {
+        if(caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
-            return e4();
+            return scanCharCierre();
         }
         else{
-            throw new ExcepcionLexica("Error: literal de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e6(){
+    public Token finalizarCharLiteral(){
         return new Token("charLiteral",lexema,sourceManager.getLineNumber());
     }
     public Token e7() throws IOException, ExcepcionLexica {
@@ -233,13 +239,21 @@ public class AnalizadorLexico {
             actualizarLexema();
             actualizarCaracterActual();
             return e9();
-        }else if (caracterActual != '\n'){ //si es cualquier otro caracter me voy para e8
+        }
+        else if(caracterActual == '"'){
+            //por un finalizador que me diga que soy un IDString
+            actualizarLexema();
+            actualizarCaracterActual();
+            return e10();
+        }
+        else if (caracterActual != '\n'){ //si es cualquier otro caracter me voy para e8
             actualizarLexema();
             actualizarCaracterActual();
             return e8();
         }
         else{
-            throw new ExcepcionLexica("Error: string de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            //actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
     public Token e8() throws IOException, ExcepcionLexica {
@@ -259,9 +273,10 @@ public class AnalizadorLexico {
             return e8();
         }
         else{
-            throw new ExcepcionLexica("Error: string de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
+    // Capaz no es necesario
     public Token e9() throws ExcepcionLexica, IOException {
         if(caracterActual == '"'){
             actualizarLexema();
@@ -269,45 +284,42 @@ public class AnalizadorLexico {
             return e8();
         }
         else{
-            throw new ExcepcionLexica("Error: string de caracter invalido ("+lexema+")",sourceManager.getLineNumber());
+            //actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     } //aca espero comilla doble ? y dsp vuelvo por E8 cualq cosa
     public Token e10(){
         return new Token("stringLiteral", lexema,sourceManager.getLineNumber());
     }
     public Token e11() throws IOException, ExcepcionLexica {
-        //va a ser aceptador porque acepta division
         if(caracterActual == '/'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e12();
+            return scanComentarioSimple();
         }else if (caracterActual == '*'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e34();
+            return scanComentarioMultilinea();
         }else{
             return new Token("/", lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e12() throws IOException, ExcepcionLexica {
+    public Token scanComentarioSimple() throws IOException, ExcepcionLexica {
         //en e12 me salteo todo hasta que me venga un enter o eof?
 
         //si es un caracter le manda mecha y no terminador
-        //es e13 en el dibujo mio
         //GUARDA CON ESTO
         if(caracterActual != '\n'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e12();
+            return scanComentarioSimple();
         }
-        else{ //si e viene un salto de linea se termino el comentario je
-            //return new Token("Comentario simple",lexema,sourceManager.getLineNumber());
+        else{
             setLexema("");
-            return einicial();
+            return estadoInicial();
         }
     }
-    public Token e34() throws IOException, ExcepcionLexica {
-        //seria mi e11 en mi diseño
+    public Token scanComentarioMultilinea() throws IOException, ExcepcionLexica {
         // si es un * se va para otro estado a ver * y caracter
        if(caracterActual == '*'){
            //aca me fui si o si a preguntar por '/'
@@ -317,30 +329,31 @@ public class AnalizadorLexico {
        } else if (caracterActual != sourceManager.END_OF_FILE){
            actualizarLexema();
            actualizarCaracterActual();
-           return e34();
+           return scanComentarioMultilinea();
        }else{
-           throw new ExcepcionLexica("String no cerrado",sourceManager.getLineNumber());
+           actualizarLexema();
+           throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
        }
     }
     public Token e35() throws ExcepcionLexica, IOException {
         if(caracterActual == '/'){
             actualizarLexema();
             actualizarCaracterActual();
-            return e36();
+            return finComentarioMultilinea();
         }
         else if (caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
-            return e34();
+            return scanComentarioMultilinea();
         }
         else{
-            throw new ExcepcionLexica("String no cerrado",sourceManager.getLineNumber());
+            actualizarLexema();
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
-    public Token e36() throws ExcepcionLexica, IOException {
-        //return new Token("Comentario multi-linea ", lexema,sourceManager.getLineNumber());
+    public Token finComentarioMultilinea() throws ExcepcionLexica, IOException {
         setLexema("");
-        return einicial();
+        return estadoInicial();
     }
     public Token e13() throws IOException {
         if(caracterActual == '='){
@@ -408,7 +421,7 @@ public class AnalizadorLexico {
     public Token e20(){
         return new Token("--", lexema, sourceManager.getLineNumber());
     }
-    public Token e21() throws IOException {
+    public Token scanOperadorMult() throws IOException {
         return new Token("*", lexema, sourceManager.getLineNumber());
     }
     public Token e22() throws ExcepcionLexica, IOException {
@@ -418,14 +431,13 @@ public class AnalizadorLexico {
             return e23();
         }
         else{
-            actualizarLexema();
-            throw new ExcepcionLexica(lexema, sourceManager.getLineNumber());
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
     public Token e23(){
         return new Token("||", lexema, sourceManager.getLineNumber());
     }
-    public Token e24(){
+    public Token scanOperadorMod(){
         return new Token("%", lexema, sourceManager.getLineNumber());
     }
     public Token e25(){
@@ -453,10 +465,20 @@ public class AnalizadorLexico {
         return new Token(":", lexema, sourceManager.getLineNumber());
     }
     public Token e33(String id){
-        return new Token(""+id+"=", lexema, sourceManager.getLineNumber());
+        return new Token(id+"=", lexema, sourceManager.getLineNumber());
     }
-    public void setCaracterActual(char caracterActual) {
-        this.caracterActual = caracterActual;
+    public Token e37() throws ExcepcionLexica, IOException {
+        if(caracterActual == '&'){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return e38();
+        }
+        else{
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
+        }
+    }
+    public Token e38(){
+        return new Token("&",lexema,sourceManager.getLineNumber());
     }
     public void setLexema(String lexema) {
         this.lexema = lexema;
@@ -541,7 +563,7 @@ public class AnalizadorLexico {
             return new Token("pr_false",lexema,sourceManager.getLineNumber());
         }
         else{
-            throw new ExcepcionLexica("Error buscando palabra reservada"+lexema+"\n",sourceManager.getLineNumber());
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
 }

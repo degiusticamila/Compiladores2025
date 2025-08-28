@@ -1,11 +1,11 @@
 public class Token {
     private String id;
-    private String Lexema;
+    private String lexema;
     private int nroLinea;
 
-    public Token(String id, String Lexema, int nroLinea) {
+    public Token(String id, String lexema, int nroLinea) {
         this.id = id;
-        this.Lexema = Lexema;
+        this.lexema = lexema;
         this.nroLinea = nroLinea;
     }
     public String getId() {
@@ -15,10 +15,10 @@ public class Token {
         this.id = id;
     }
     public String getLexema() {
-        return Lexema;
+        return lexema;
     }
-    public void setLexema(String Lexema) {
-        this.Lexema = Lexema;
+    public void setLexema(String lexema) {
+        this.lexema = lexema;
     }
     public int getNroLinea() {
         return nroLinea;
@@ -26,5 +26,7 @@ public class Token {
     public void setNroLinea(int nroLinea) {
         this.nroLinea = nroLinea;
     }
-
+    public String toString() {
+        return ("("+id+", "+lexema+", "+nroLinea+")");
+    }
 }

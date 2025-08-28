@@ -3,7 +3,7 @@ public class ExcepcionLexica extends Exception{
     private int numLine;
 
     public ExcepcionLexica(String lexema, int numLine){
-        super("Error lexico: simbolo inesperado: "+lexema+"en linea "+numLine);
+        super("[Error:"+lexema+"|"+numLine+"]");
         this.lexema = lexema;
         this.numLine = numLine;
     }
