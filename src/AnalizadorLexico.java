@@ -144,7 +144,6 @@ public class AnalizadorLexico {
             return e32();
         }
         if (caracterActual == '/'){
-            //primero q nada tiene que ser finalizador pq es una division ?
             actualizarLexema();
             actualizarCaracterActual();
             return e11();
@@ -278,11 +277,19 @@ public class AnalizadorLexico {
     }
     // Capaz no es necesario
     public Token e9() throws ExcepcionLexica, IOException {
-        if(caracterActual == '"'){
+        /*if(caracterActual == '"'){
             actualizarLexema();
             actualizarCaracterActual();
             return e8();
         }
+        */
+        //NUEVO PARA CHEQUEAR ESCAPES
+        if(caracterActual != '\n'){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return e8();
+        }
+
         else{
             //actualizarLexema();
             throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
