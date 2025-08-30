@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.sql.SQLOutput;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args){
@@ -11,8 +12,7 @@ public class Main {
             sourceManager.open(args[0]);
             AnalizadorLexico analizadorLexico = new AnalizadorLexico(sourceManager);
 
-            boolean hayErrores = false;
-
+            String test = "[SinErrores]";
             while (analizadorLexico.getCaracterActual() != sourceManager.END_OF_FILE) {
 
                 analizadorLexico.setLexema(""); // Reset
@@ -21,15 +21,20 @@ public class Main {
                     System.out.println(token);
 
                 } catch (ExcepcionLexica ex) {
-                    // Caso: se detecta un error lexico
-                    System.out.println(ex.getMessage());
-                    hayErrores = true;
-                    break;
-                }
 
+                    System.out.println("Error lexico en Linea "+sourceManager.getLineNumber()+" | Columna "+sourceManager.getLineIndexNumber()+": "+analizadorLexico.getLexema()+ " no es un simbolo valido");
+                    System.out.println(ex.mostrarDetalle(sourceManager.getCurrentLine(),analizadorLexico.getLexema(),sourceManager.getLineIndexNumber()));
+                    System.out.println(ex.getMessage());
+                    test = "";
+
+
+                    analizadorLexico.actualizarCaracterActual();
+                    analizadorLexico.setLexema("");
+                }
             }
             sourceManager.close();
-            if (!hayErrores) System.out.println("[SinErrores]");
+
+            if (!test.isEmpty()) System.out.println("[SinErrores]");
         } catch (IOException e) {
             e.printStackTrace();
         }

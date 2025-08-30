@@ -11,6 +11,6 @@ public interface SourceManager {
     char getNextChar() throws IOException;
 
     int getLineNumber();
-
+    String getCurrentLine();
     public static final char END_OF_FILE = (char) 26;
 }

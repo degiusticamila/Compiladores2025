@@ -68,7 +68,6 @@ public class TesterDeCasosConErrores {
         assertThat("No se encontro el codigo: " + errorCode,  outContent.toString(), CoreMatchers.containsString(errorCode));
     }
 
-
     String getErrorCode(String testCaseFilePath)  {
         String lineWithTheCode = null;
         try {

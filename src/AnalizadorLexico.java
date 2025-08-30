@@ -266,7 +266,7 @@ public class AnalizadorLexico {
             actualizarLexema();
             actualizarCaracterActual();
             return e10();
-        }else if(caracterActual != '\n'){
+        }else if(caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
             return e8();
@@ -275,14 +275,8 @@ public class AnalizadorLexico {
             throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
     }
-    // Capaz no es necesario
     public Token e9() throws ExcepcionLexica, IOException {
-        /*if(caracterActual == '"'){
-            actualizarLexema();
-            actualizarCaracterActual();
-            return e8();
-        }
-        */
+
         //NUEVO PARA CHEQUEAR ESCAPES
         if(caracterActual != '\n'){
             actualizarLexema();
@@ -294,7 +288,7 @@ public class AnalizadorLexico {
             //actualizarLexema();
             throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
-    } //aca espero comilla doble ? y dsp vuelvo por E8 cualq cosa
+    }
     public Token e10(){
         return new Token("stringLiteral", lexema,sourceManager.getLineNumber());
     }
@@ -312,10 +306,6 @@ public class AnalizadorLexico {
         }
     }
     public Token scanComentarioSimple() throws IOException, ExcepcionLexica {
-        //en e12 me salteo todo hasta que me venga un enter o eof?
-
-        //si es un caracter le manda mecha y no terminador
-        //GUARDA CON ESTO
         if(caracterActual != '\n'){
             actualizarLexema();
             actualizarCaracterActual();
@@ -327,9 +317,7 @@ public class AnalizadorLexico {
         }
     }
     public Token scanComentarioMultilinea() throws IOException, ExcepcionLexica {
-        // si es un * se va para otro estado a ver * y caracter
        if(caracterActual == '*'){
-           //aca me fui si o si a preguntar por '/'
            actualizarLexema();
            actualizarCaracterActual();
            return e35();
@@ -404,8 +392,8 @@ public class AnalizadorLexico {
     }
     public Token e17() throws IOException {
         if(caracterActual == '+'){
-            lexema = lexema + caracterActual;
-            caracterActual = sourceManager.getNextChar();
+            actualizarLexema();
+            actualizarCaracterActual();
             return e18();
         }
         else{
@@ -417,8 +405,8 @@ public class AnalizadorLexico {
     }
     public Token e19() throws IOException {
         if(caracterActual == '-'){
-            lexema = lexema + caracterActual;
-            caracterActual = sourceManager.getNextChar();
+            actualizarLexema();
+            actualizarCaracterActual();
             return e20();
         }
         else{
@@ -572,5 +560,8 @@ public class AnalizadorLexico {
         else{
             throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
+    }
+    public String getLexema() {
+        return lexema;
     }
 }

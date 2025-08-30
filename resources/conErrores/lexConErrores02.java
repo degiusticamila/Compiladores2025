@@ -1,4 +1,7 @@
-///[Error:"hola|3]
-
+///[Error:"hola|2]
 "hola
 chau"
+
+sarasa | chau"
+
+# # # # # "hola
