@@ -21,7 +21,6 @@ public class AnalizadorLexico {
             actualizarCaracterActual();
             return estadoInicial();
         }
-
         if (Character.isLetter(caracterActual)) {
             actualizarLexema();
             actualizarCaracterActual();

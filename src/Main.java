@@ -11,7 +11,6 @@ public class Main {
 
             String test = "[SinErrores]";
             while (analizadorLexico.getCaracterActual() != sourceManager.END_OF_FILE) {
-
                 analizadorLexico.setLexema("");
                 try {
                     Token token = analizadorLexico.proximoToken();
