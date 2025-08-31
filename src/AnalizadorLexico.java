@@ -21,14 +21,23 @@ public class AnalizadorLexico {
             actualizarCaracterActual();
             return estadoInicial();
         }
-        if (Character.isLetter(caracterActual)) {
+        if (Character.isLetter(caracterActual) && Character.isUpperCase(caracterActual)) {
+
             actualizarLexema();
             actualizarCaracterActual();
-            if (Character.isUpperCase(caracterActual)) {
+            return scanIdentificadorClase();
+            /*if (Character.isUpperCase(caracterActual)) {
                 return scanIdentificadorClase();
             } else {
                 return scanIdentificadorVarOMetodo();
             }
+
+             */
+        }
+        if(Character.isLetter(caracterActual) && Character.isLowerCase(caracterActual)) {
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanIdentificadorVarOMetodo();
         }
         if (Character.isDigit(caracterActual)) {
             actualizarLexema();
