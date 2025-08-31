@@ -4,13 +4,13 @@ public class ExcepcionLexica extends Exception{
     private String lexema;
     private int numLine;
     private StringBuilder detalle;
-
-    public ExcepcionLexica(String lexema, int numLine){
+    private String descrip;
+    public ExcepcionLexica(String lexema, int numLine, String descrip){
         super("[Error:"+lexema+"|"+numLine+"]");
         this.lexema = lexema;
         this.numLine = numLine;
         this.detalle = new StringBuilder();
-
+        this.descrip = descrip;
     }
     public String getLexema(){
         return lexema;
@@ -36,5 +36,8 @@ public class ExcepcionLexica extends Exception{
         detalle.append('^');
 
         return detalle.toString();
+    }
+    public String getDescrip(){
+        return descrip;
     }
 }
