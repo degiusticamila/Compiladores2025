@@ -27,7 +27,7 @@ public class ExcepcionLexica extends Exception{
         detalle.append(currentLine);
         detalle.append('\n');
 
-        int ancho = lineIndexNumber - 1;
+        int ancho = Math.min(lineIndexNumber - 1,currentLine.length()-1);
         //Busca la linea exacta donde esta el lexema desde ancho para atras.
         int startIndex = currentLine.lastIndexOf(lexema, ancho);
         for (int i = 0; i < prefijo.length() + startIndex; i++) {

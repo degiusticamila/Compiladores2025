@@ -198,6 +198,13 @@ public class AnalizadorLexico {
             actualizarCaracterActual();
             return scanCharEscape();
         }
+        /*else if(caracterActual == 'u'){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode1();
+        }
+
+         */
         else if(caracterActual != '\'' && caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
@@ -220,6 +227,11 @@ public class AnalizadorLexico {
         }
     }
     public Token scanCharEscape() throws IOException, ExcepcionLexica {
+        if(caracterActual == 'u'){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode1();
+        }
         if(caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
@@ -229,6 +241,62 @@ public class AnalizadorLexico {
             actualizarLexema();
             throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
         }
+    }
+    public Token scanUnicode1() throws IOException, ExcepcionLexica {
+        if(Character.isDigit(caracterActual) || Character.isLetter(caracterActual)){
+            //CICLA INFINITO, TIENE QUE CORTAR CUANDO SEA 4 EL LENGTH DEL LEXEMA, PERO SI ME VIENE OTRO
+            //QUE NO ES NI DIGITO NI LETRA TIENE QUE TIRAR EXCEPCION
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode2();
+        }
+        else throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
+        //si viene digito o letra
+        //son 4 veces, sino error
+    }
+    public Token scanUnicode2() throws IOException, ExcepcionLexica {
+        if(Character.isDigit(caracterActual) || Character.isLetter(caracterActual)){
+            //CICLA INFINITO, TIENE QUE CORTAR CUANDO SEA 4 EL LENGTH DEL LEXEMA, PERO SI ME VIENE OTRO
+            //QUE NO ES NI DIGITO NI LETRA TIENE QUE TIRAR EXCEPCION
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode3();
+        }
+        else{
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
+        }
+    }
+    public Token scanUnicode3() throws IOException, ExcepcionLexica {
+        if(Character.isDigit(caracterActual) || Character.isLetter(caracterActual)){
+            //CICLA INFINITO, TIENE QUE CORTAR CUANDO SEA 4 EL LENGTH DEL LEXEMA, PERO SI ME VIENE OTRO
+            //QUE NO ES NI DIGITO NI LETRA TIENE QUE TIRAR EXCEPCION
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode4();
+        }
+        else{
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
+        }
+    }
+    public Token scanUnicode4() throws IOException, ExcepcionLexica {
+        if(Character.isDigit(caracterActual) || Character.isLetter(caracterActual)){
+            //CICLA INFINITO, TIENE QUE CORTAR CUANDO SEA 4 EL LENGTH DEL LEXEMA, PERO SI ME VIENE OTRO
+            //QUE NO ES NI DIGITO NI LETRA TIENE QUE TIRAR EXCEPCION
+            actualizarLexema();
+            actualizarCaracterActual();
+            return scanUnicode5();
+        }
+        else{
+            throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
+        }
+    }
+    public Token scanUnicode5() throws IOException, ExcepcionLexica {
+        if(caracterActual == '\''){
+            actualizarLexema();
+            actualizarCaracterActual();
+            return finalizarCharLiteral();
+        }
+        else throw new ExcepcionLexica(lexema,sourceManager.getLineNumber());
     }
     public Token finalizarCharLiteral(){
         return new Token("charLiteral",lexema,sourceManager.getLineNumber());
@@ -290,6 +358,8 @@ public class AnalizadorLexico {
         }
     }
     public Token e10(){
+        //una vez que termina el string se puede preguntar si es o no Unicode
+
         return new Token("stringLiteral", lexema,sourceManager.getLineNumber());
     }
     public Token e11() throws IOException, ExcepcionLexica {
@@ -306,7 +376,7 @@ public class AnalizadorLexico {
         }
     }
     public Token scanComentarioSimple() throws IOException, ExcepcionLexica {
-        if(caracterActual != '\n'){
+        if(caracterActual != '\n' && caracterActual != sourceManager.END_OF_FILE){
             actualizarLexema();
             actualizarCaracterActual();
             return scanComentarioSimple();
