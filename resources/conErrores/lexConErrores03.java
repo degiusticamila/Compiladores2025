@@ -7,12 +7,12 @@ if class}
 
 'a '
 
-'\u%sdf'
+'\u%sdf
 
 
 '\uffff'
 
 
 
-'\asdf'
+'\asdf'a'
 

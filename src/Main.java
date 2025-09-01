@@ -8,24 +8,30 @@ public class Main {
             SourceManagerImpl sourceManager = new SourceManagerImpl();
             sourceManager.open(args[0]);
             AnalizadorLexico analizadorLexico = new AnalizadorLexico(sourceManager);
-
             String test = "[SinErrores]";
-            while (analizadorLexico.getCaracterActual() != sourceManager.END_OF_FILE) {
+            Token token;
+            do{
                 analizadorLexico.setLexema("");
-                try {
-                    Token token = analizadorLexico.proximoToken();
+                try{
+                    token = analizadorLexico.proximoToken();
                     System.out.println(token);
-
-                } catch (ExcepcionLexica ex) {
-
-                    System.out.println("Error lexico en Linea "+sourceManager.getLineNumber()+" | Columna "+sourceManager.getLineIndexNumber()+": "+analizadorLexico.getLexema()+" "+ex.getDescrip());
-                    System.out.println(ex.mostrarDetalle(sourceManager.getCurrentLine(),analizadorLexico.getLexema(),sourceManager.getLineIndexNumber()));
+                }catch(ExcepcionLexica ex){
+                    System.out.println("Error lexico en Linea "
+                            + sourceManager.getLineNumber()+" | Columna "
+                            + sourceManager.getLineIndexNumber()
+                            + ": "+analizadorLexico.getLexema()+" "
+                            + ex.getDescrip());
+                    System.out.println(ex.mostrarDetalle(
+                            sourceManager.getCurrentLine(),
+                            analizadorLexico.getLexema(),
+                            sourceManager.getLineIndexNumber()));
                     System.out.println(ex.getMessage());
+                    token = null;
                     test = "";
                     analizadorLexico.actualizarCaracterActual();
                     analizadorLexico.setLexema("");
                 }
-            }
+            } while(token == null || !token.getId().equals("EOF"));
             sourceManager.close();
             if (!test.isEmpty()) System.out.println("[SinErrores]");
         } catch (IOException e) {

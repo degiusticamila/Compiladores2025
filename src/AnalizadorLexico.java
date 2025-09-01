@@ -22,17 +22,9 @@ public class AnalizadorLexico {
             return estadoInicial();
         }
         if (Character.isLetter(caracterActual) && Character.isUpperCase(caracterActual)) {
-
             actualizarLexema();
             actualizarCaracterActual();
             return scanIdentificadorClase();
-            /*if (Character.isUpperCase(caracterActual)) {
-                return scanIdentificadorClase();
-            } else {
-                return scanIdentificadorVarOMetodo();
-            }
-
-             */
         }
         if(Character.isLetter(caracterActual) && Character.isLowerCase(caracterActual)) {
             actualizarLexema();
@@ -152,7 +144,9 @@ public class AnalizadorLexico {
             return e11();
         }
         if (caracterActual == sourceManager.END_OF_FILE){
-            return new Token("EOF",lexema,sourceManager.getLineNumber());
+            actualizarLexema();
+            actualizarCaracterActual();
+            return new Token("EOF","EOF",sourceManager.getLineNumber());
         }
         actualizarLexema();
         throw new ExcepcionLexica(lexema,sourceManager.getLineNumber(),"Simbolo desconocido");
